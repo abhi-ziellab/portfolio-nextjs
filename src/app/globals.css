@@ -4,21 +4,68 @@
 
 :root {
   --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 26, 26, 26;
-  --background-end-rgb: 26, 26, 26;
+  --background-rgb: 0, 0, 0;
+  --text-secondary: 160, 160, 160;
+  --border-color: 38, 38, 38;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
+  background: rgb(var(--background-rgb));
+  -webkit-font-smoothing: antialiased;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-bold;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  .text-gradient {
+    background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+  border: 1px solid rgb(var(--border-color));
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgb(var(--foreground-rgb) / 0.1);
+  background: rgb(var(--foreground-rgb) / 0.02);
+}
+
+.button-primary {
+  background: rgb(var(--foreground-rgb));
+  color: rgb(var(--background-rgb));
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.button-primary:hover {
+  background: rgb(var(--foreground-rgb) / 0.9);
+}
+
+.nav-link {
+  color: rgb(var(--text-secondary));
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: rgb(var(--foreground-rgb));
 }
