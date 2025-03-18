@@ -2,26 +2,59 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import {
+  LiveKitRoom,
+  AudioConference,
+  ControlBar,
+  RoomAudioRenderer,
+  GridLayout,
+  ParticipantTile,
+} from '@livekit/components-react';
+import '@livekit/components-styles';
 
 export default function AudioCall() {
-  const [messages, setMessages] = useState([
-    {
-      role: "user",
-      content: "Hi. How's it going?",
+  const [token, setToken] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Generate a random user ID for demo purposes
+    const userId = `user_${Math.floor(Math.random() * 10000)}`;
+    const roomName = "manus-demo-room";
+    
+    // Fetch token from our API
+    const fetchToken = async () => {
+      try {
+        setIsLoading(true);
+        const resp = await fetch(`/api/token?identity=${userId}&room=${roomName}`);
+        
+        if (!resp.ok) {
+          const error = await resp.json();
+          throw new Error(error.error || 'Failed to get token');
+        }
+        
+        const { token } = await resp.json();
+        setToken(token);
+      } catch (e) {
+        console.error('Error fetching token:', e);
+        setError(e instanceof Error ? e.message : 'Failed to get access token');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchToken();
+  }, []);
+
+  // Room connection options
+  const roomOptions = {
+    adaptiveStream: true,
+    dynacast: true,
+    publishDefaults: {
+      simulcast: true,
+      videoCodec: 'vp8' as const,
     },
-    {
-      role: "assistant",
-      content: "Oh, hey.",
-    },
-    {
-      role: "assistant",
-      content: "Just hanging in there.",
-    },
-    {
-      role: "assistant",
-      content: "How about you?",
-    },
-  ]);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
@@ -35,65 +68,87 @@ export default function AudioCall() {
       </header>
 
       <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-6 py-8">
-        {/* Messages */}
-        <div className="flex-1 overflow-auto mb-10">
-          {messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={`mb-8 ${message.role === "user" ? "flex flex-col items-end" : ""}`}
-            >
-              <div 
-                className={`rounded-lg p-4 max-w-[80%] ${
-                  message.role === "user" 
-                    ? "bg-gray-100 rounded-tr-none" 
-                    : "bg-gray-50 border border-gray-200 rounded-tl-none"
-                }`}
+        {error ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xl text-red-500">Error: {error}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Please refresh the page to try again.
+              </p>
+              <Link 
+                href="/"
+                className="mt-4 inline-block px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors"
               >
-                <div className="text-sm text-gray-500 mb-1">
-                  {message.role === "user" ? "User" : "Assistant"}
-                </div>
-                <div className="text-lg font-normal">
-                  {message.content}
-                </div>
+                Return to Home
+              </Link>
+            </div>
+          </div>
+        ) : isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xl">Connecting to audio call...</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Setting up your audio session...
+              </p>
+            </div>
+          </div>
+        ) : token ? (
+          <LiveKitRoom
+            token={token}
+            serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://example.livekit.cloud"}
+            options={roomOptions}
+            className="h-full"
+            onDisconnected={() => {
+              window.location.href = '/';
+            }}
+          >
+            {/* Audio renderer handles all the audio playback */}
+            <RoomAudioRenderer />
+            
+            {/* The main audio conference component */}
+            <div className="flex-1 flex flex-col">
+              <div className="flex-1 mb-4">
+                <AudioConference />
+              </div>
+              
+              {/* Control bar with appropriate options for an audio call */}
+              <div className="mt-auto">
+                <ControlBar 
+                  controls={{
+                    microphone: true,
+                    screenShare: false,
+                    camera: false,
+                    leave: true
+                  }}
+                />
+              </div>
+              
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-500">
+                  You are connected to the Manus audio room.
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Note: This is a demo interface. Audio connections require a LiveKit server.
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Audio controls */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4">
-          <div className="max-w-3xl mx-auto px-6 flex items-center">
-            <button className="rounded-full bg-gray-100 w-12 h-12 flex items-center justify-center shadow-sm hover:bg-gray-200 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-            </button>
-            
-            {/* Sound wave visualization */}
-            <div className="flex-1 mx-4 h-8 flex items-center justify-center">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <div 
-                  key={i}
-                  className="bg-gray-400 w-1 mx-0.5 rounded-full"
-                  style={{ 
-                    height: `${Math.sin((i + 1) / 3) * 100 * 0.25 + 10}%`,
-                    opacity: i % 3 === 0 ? 0.7 : 0.5
-                  }}
-                ></div>
-              ))}
+          </LiveKitRoom>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-xl">Failed to connect</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Unable to establish an audio connection.
+              </p>
+              <Link 
+                href="/"
+                className="mt-4 inline-block px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors"
+              >
+                Return to Home
+              </Link>
             </div>
-            
-            <Link 
-              href="/" 
-              className="px-4 py-2 bg-red-500 text-white rounded-md font-medium hover:bg-red-600 transition-colors flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
-              </svg>
-              End Call
-            </Link>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
