@@ -20,6 +20,12 @@ export default function Navigation() {
         <Link href="#get-started" className="nav-link text-sm">
           Get Started
         </Link>
+        <Link
+          href="/call"
+          className="button-primary text-sm"
+        >
+          Try Manus
+        </Link>
       </div>
     </nav>
   );

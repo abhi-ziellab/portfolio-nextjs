@@ -14,7 +14,7 @@ export default function Home() {
           </p>
           <div className="pt-4">
             <Link 
-              href="#try"
+              href="/call"
               className="inline-flex items-center px-6 py-3 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 transition-colors"
             >
               Try Manus
@@ -89,14 +89,12 @@ export default function Home() {
             Experience the future of AI assistance today. Manus is ready to help you accomplish your goals, no matter how complex.
           </p>
           <div className="pt-2">
-            <a 
-              href="https://chat.openai.com/g/g-VA4Vg1iCX-manus" 
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href="/call"
               className="inline-flex items-center px-6 py-3 text-sm font-medium text-black bg-white rounded-full hover:bg-gray-100 transition-colors"
             >
               Try Manus
-            </a>
+            </Link>
           </div>
         </div>
       </section>
