@@ -8,36 +8,18 @@ export default function AudioCall() {
     {
       role: "user",
       content: "Hi. How's it going?",
-      emotions: [
-        { name: "Realization", value: 0.32 },
-        { name: "Calmness", value: 0.29 },
-        { name: "Disappointment", value: 0.24 },
-      ],
     },
     {
       role: "assistant",
       content: "Oh, hey.",
-      emotions: [
-        { name: "Excitement", value: 0.15 },
-        { name: "Distress", value: 0.12 },
-        { name: "Surprise (positive)", value: 0.12 },
-      ],
     },
     {
       role: "assistant",
       content: "Just hanging in there.",
-      emotions: [
-        { name: "Amusement", value: 0.15 },
-        { name: "Awkwardness", value: 0.13 },
-        { name: "Excitement", value: 0.12 },
-      ],
     },
     {
       role: "assistant",
       content: "How about you?",
-      emotions: [
-        { name: "Interest", value: 0.15 },
-      ],
     },
   ]);
 
@@ -56,49 +38,24 @@ export default function AudioCall() {
         {/* Messages */}
         <div className="flex-1 overflow-auto mb-10">
           {messages.map((message, index) => (
-            <div key={index} className="mb-10">
-              <div className="font-medium text-gray-500 mb-1">
-                {message.role === "user" ? "User" : "Assistant"}
-              </div>
-              <div className="text-lg font-normal mb-3">
-                {message.content}
-              </div>
-              {message.emotions && (
-                <div className="flex flex-col space-y-2.5">
-                  {message.emotions.map((emotion, emoIndex) => (
-                    <div key={emoIndex} className="flex items-center">
-                      <div className="w-32 text-sm text-gray-600">
-                        {emotion.name}
-                      </div>
-                      <div className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${
-                            message.role === "user" 
-                              ? "bg-blue-500" 
-                              : emotion.name === "Excitement" 
-                                ? "bg-yellow-400" 
-                                : emotion.name === "Distress" 
-                                  ? "bg-green-400" 
-                                  : emotion.name === "Surprise (positive)" 
-                                    ? "bg-green-400"
-                                    : emotion.name === "Amusement"
-                                      ? "bg-yellow-400"
-                                      : emotion.name === "Awkwardness" 
-                                        ? "bg-green-400"
-                                        : emotion.name === "Interest"
-                                          ? "bg-gray-400"
-                                          : "bg-yellow-400"
-                          }`}
-                          style={{ width: `${emotion.value * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="ml-2 text-sm text-gray-600 w-10 text-right">
-                        {emotion.value.toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
+            <div 
+              key={index} 
+              className={`mb-8 ${message.role === "user" ? "flex flex-col items-end" : ""}`}
+            >
+              <div 
+                className={`rounded-lg p-4 max-w-[80%] ${
+                  message.role === "user" 
+                    ? "bg-gray-100 rounded-tr-none" 
+                    : "bg-gray-50 border border-gray-200 rounded-tl-none"
+                }`}
+              >
+                <div className="text-sm text-gray-500 mb-1">
+                  {message.role === "user" ? "User" : "Assistant"}
                 </div>
-              )}
+                <div className="text-lg font-normal">
+                  {message.content}
+                </div>
+              </div>
             </div>
           ))}
         </div>
